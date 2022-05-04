@@ -1,150 +1,156 @@
-# Python3 Program to print BFS traversal
-# from a given source vertex. BFS(int s)
-# traverses vertices reachable from s.
-"""from collections import defaultdict
+import pygame
+import math
+from sys import exit
+from pygame.locals import *
 
-
-# This class represents a directed graph
-# using adjacency list representation
+#TODO graph class
 class Graph:
-
-    # Constructor
     def __init__(self):
-
-        # default dictionary to store graph
-        self.graph = defaultdict(list)
-
-    # function to add an edge to graph
-    def addEdge(self, u, v):
-        self.graph[u].append(v)
-
-    # Function to print a BFS of graph
-    def BFS(self, s):
-
-        # Mark all the vertices as not visited
-        visited = [False] * (len(self.graph))
-
-        # Create a queue for BFS
-        queue = []
-
-        # Mark the source node as
-        # visited and enqueue it
-        queue.append(s)
-        visited[s] = True
-
-        while queue:
-
-            # Dequeue a vertex from
-            # queue and print it
-            s = queue.pop(0)
-            print(s, end=" ")
-
-            # Get all adjacent vertices of the
-            # dequeued vertex s. If a adjacent
-            # has not been visited, then mark it
-            # visited and enqueue it
-            for i in self.graph[s]:
-                if visited[i] == False:
-                    queue.append(i)
-                    visited[i] = True
+        self.adj_matrix = []
+        self.node_to_be_moved = Rect()
 
 
-# Driver code
-
-# Create a graph given in
-# the above diagram
-g = Graph()
-print("Enter number of edges")
-a = int(input())
-print("Enter edges")
-#for i in range(a)
-#    g.addEdge(int(input()), int(input())
-#g.addEdge(0, 1)
-#g.addEdge(0, 2)
-#g.addEdge(1, 2)
-#g.addEdge(2, 0)
-#g.addEdge(2, 3)
-#g.addEdge(3, 3)
-
-print("Following is Breadth First Traversal"
-      " (starting from vertex 2)")
-g.BFS(2)
-
-# This code is contributed by Neelam Yadav"""
-
-# Using a Python dictionary to act as an adjacency list
-"""graph = {
-  '5' : ['3','7'],
-  '3' : ['2', '4'],
-  '7' : ['8'],
-  '2' : [],
-  '4' : ['8'],
-  '8' : []
-}
-
-visited = set() # Set to keep track of visited nodes of graph.
-
-def dfs(visited, graph, node):  #function for dfs
-    if node not in visited:
-        print ("not in visited:" node " ")
-        visited.add(node)
-        for neighbour in graph[node]:
-            dfs(visited, graph, neighbour)
-
-# Driver Code
-print("Following is the Depth-First Search")
-dfs(visited, graph, 4)"""
+class Button:
+    def __init__(self, screen, colour, x, y, width, height, text = ''):
+        self.screen = screen
+        self.colour = colour
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.text = text
 
 
-# adjacency list representation
-adj_list = {}
-mylist = []
+    def draw_button(self, outline = None):
+        if outline:
+            pygame.draw.rect(self.screen, outline, (self.x-2, self.y-2, self.width+4, self.height+4), 0)
+        pygame.draw.rect(self.screen, self.colour, (self.x, self.y, self.width, self.height), 0)
+        if self.text != '':
+            font = pygame.font.SysFont("Calibri", 20)
+            text_surface = font.render(self.text, True, "black")
+            self.screen.blit(text_surface, (self.x + (self.width / 2 - text_surface.get_width() / 2), self.y + (self.height / 2 - text_surface.get_height() / 2)))
 
 
-def add_node(node):
-    if node not in mylist:
-        mylist.append(node)
-    else:
-        print("Node ", node, " already exists!")
+    def isOver(self, pos): #pos is (x,y) tuple
+        if pos[0] > self.x and pos[0] < self.x + self.width:
+            if pos[1] > self.y and pos[1] < self.y + self.height:
+                return True
+        return False
 
 
-def add_edge(node1, node2, weight):
-    temp = []
-    if node1 in mylist and node2 in mylist:
-        if node1 not in adj_list:
-            temp.append([node2, weight])
-            adj_list[node1] = temp
+#TODO finish arrow
+class Arrow: #TODO Rect obj!!!
+    def __init__(self, start_node, end_node, directed): #edge between two circles, and bool directed or not
+        self.start_node = start_node
+        self.end_node = end_node
+        self.directed = directed
 
-        elif node1 in adj_list:
-            temp.extend(adj_list[node1])
-            temp.append([node2, weight])
-            adj_list[node1] = temp
-
-    else:
-        print("Nodes don't exist!")
+    #def draw_arrow(self):
+        #pygame.draw.polygon(screen, (0, 0, 0),
+        #                    ((0, 100), (0, 200), (200, 200), (200, 300), (300, 150), (200, 0), (200, 100)))
 
 
-def graph():
-    for node in adj_list:
-        print(node, " ---> ", [i for i in adj_list[node]])
+#TODO finish node
+class Node:
+    def __init__(self, surf, color, center_x, center_y, radius):
+        self.screen = screen
+        self.color = color
+        self.center_x = center_x
+        self.center_y = center_y
+        self.radius = radius
+
+        self.surf = surf
+        self.rect = pygame.draw.circle(self.surf, self.color, center=(self.center_x, self.center_y), radius=self.radius)
+
+    def move_node(self):
+        print("mouse clicked on node")
+        #if event.type == MOUSEBUTTONDOWN:
+            #new_mouse_pos =
+        #self.screen.blit(pygame.transform.rotate(self.surface, 0), (10,10))
+
+    def isOver(self, pos):
+        if pos[0] > self.rect.midleft[0] and pos[0] < self.rect.midright[0]:
+            if pos[1] < self.rect.midbottom[1] and pos[1] > self.rect.midtop[1]:
+                return True
+        return False
 
 
-# Adding nodes
-add_node(0)
-add_node(1)
-add_node(2)
-add_node(3)
-add_node(4)
-# Adding edges
-add_edge(0, 1, 2)
-add_edge(1, 2, 2)
-add_edge(2, 3, 4)
-add_edge(3, 0, 5)
-add_edge(3, 4, 3)
-add_edge(4, 0, 1)
+pygame.init()
+clock = pygame.time.Clock()
 
-# Printing the graph
-graph()
+screen = pygame.display.set_mode((1000,500))
+screen.fill("grey")
+pygame.display.set_caption("CSE472 AI PROJECT")
 
-# Printing the adjacency list
-print(adj_list)
+graph = pygame.Surface((500,480))
+graph.fill("white")
+
+nodes = []
+edges = [[]]
+
+
+
+#clicking = False
+
+while True:
+    add_node_btn = Button(screen, "light grey", 600, 50, 100, 30, text='Add node')
+    add_node_btn.draw_button("dark grey")
+
+    directed_btn = Button(screen, "light grey", 750, 50, 150, 30, text='Toggle directed')
+    directed_btn.draw_button("dark grey")
+
+    mouse_pos = pygame.mouse.get_pos()
+
+    #current_node_surf = pygame.Surface((20,20))
+    #current_node_surf.fill("white")
+    #current_node = Node(surf=current_node_surf, color="black", center_x=200, center_y=200, radius=20)
+    #current_node_rect = current_node_surf.get_rect()
+
+    #rot = 0
+    #loc = [mouse_pos[0], mouse_pos[1]]
+    #if clicking:
+        #rot -= 90
+    #screen.blit(pygame.transform.rotate(current_node.surface, rot), (loc[0], loc[1]))
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if add_node_btn.isOver(mouse_pos):
+                    print("mouse button is down on Add Node btn")
+                    background = screen
+                    screen.blit(background, (0, 0))
+                    current_node_surf = pygame.transform.scale(pygame.image.load('R.png'), (40,40))
+                    current_node_rect = current_node_surf.get_rect()
+                    #current_node_surf = pygame.Surface((40,40))
+                    #current_node_surf.fill("yellow")
+                    #current_node_rect = pygame.draw.circle(surface=current_node_surf, color="green", center=(200,200), radius=20, width=3)
+                    graph.blit(current_node_surf, (200,200), current_node_rect)
+                    pygame.display.update()
+                    #current_node = Node(screen=graph, color="black", center_x=200, center_y=200, radius=20)
+                    #nodes.append(current_node)
+                if mouse_pos[0] > 200 and mouse_pos[1] > 200:
+                    for x in range(100):
+                        screen.blit(background, current_node_rect)  # erase
+                        position = (pygame.mouse.get_pos()[0] - 20, pygame.mouse.get_pos()[1] - 20) # move player
+                        graph.blit(current_node_surf, position, current_node_rect)  # draw new player
+                        pygame.display.update()  # and show it all
+                        #pygame.time.delay(100)  # stop the program for 1/10 second
+                    print("mouse button down on current node")
+                    #clicking = True
+
+        if event.type == MOUSEBUTTONUP:
+            if event.button == 1:
+                #clicking = False
+                print("mouse button is up")
+
+    #graph.blit(current_node_surf, (200,200))
+    screen.blit(graph, (10,10))
+    pygame.display.update()
+    clock.tick(60)
+
+pygame.quit()
+quit()
