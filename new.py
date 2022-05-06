@@ -281,7 +281,7 @@ dfs(visited, graph, 4)"""
 #     if node not in mylist:
 #         mylist.append(node)
 #     else:
-#         print("Node ", node, " already exists!")
+#         print("Nodes ", node, " already exists!")
 #
 #
 # def add_edge(node1, node2, weight):
