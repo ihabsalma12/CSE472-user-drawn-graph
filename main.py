@@ -147,9 +147,9 @@ class App:
         c2 = Checkbutton(self.checkbox_frame, text="DFS").grid(row=1, column=0, sticky=NW)
         c3 = Checkbutton(self.checkbox_frame, text="Uniform Cost").grid(row=2, column=0, sticky=NW)
         c4 = Checkbutton(self.checkbox_frame, text="Iterative Deepening").grid(row=2, column=0, sticky=NW)
-        l4 = Entry(self.checkbox_frame, borderwidth=3, width=5).grid(row=1, column=1, sticky=NW)
         c5 = Checkbutton(self.checkbox_frame, text="Greedy").grid(row=0, column=1, sticky=NW)
         c6 = Checkbutton(self.checkbox_frame, text="A*").grid(row=1, column=1, sticky=NW)
+        l4 = Entry(self.checkbox_frame, borderwidth=3, width=5).grid(row=2, column=1, sticky=NW)
         #TODO finish checkboxes and link up with backend
 
     def setStart(self, event):

@@ -1,0 +1,23 @@
+User Guide: (draft)
+
+step 1) Click on "Add nodes" button.
+step 2) Click anywhere on the canvas, and a node will be added in mouse position.
+step 3) Click on the "Add nodes" button when you're done adding nodes.
+Note: If you want to add nodes at any step later, you can repeat steps 1-3. 
+If you want to remove nodes, close the window and restart.
+step 4) Click on either "Add directed edges" or "Add undirected edges".
+step 5) If you click on two nodes in the canvas, then an edge will be drawn.
+(not necessarily different nodes: can be self-directed edge)
+As soon as the directed edge is drawn, you cannot change and draw any undirected edges, and vice versa.
+step 6) Click on the button again to stop adding edges.
+Note: You can repeat steps 4-6 anytime you like later on, but stick with the same type of edges (directed or undirected).
+If you want to remove edges, close the window and start again.
+step 7) Follow instructions to add weight to edges. Weight can be added twice for the same edge; the latter value is selected.
+step 8) Click on start node button, choose your start node by clicking on it in the canvas. 
+If multiple nodes chosen, then Latter node is selected as start node.
+Then, click on the button again.
+step 9) Click on goal nodes button, choose all your goal nodes, then click on the button again.
+Note: to clear goal nodes, repeat step 9.
+
+step 10) Tick checkboxes. Click "Search".
+Results displayed.
