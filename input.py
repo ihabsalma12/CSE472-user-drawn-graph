@@ -1,11 +1,15 @@
-import sys
-from pprint import pprint
+from backend import *
 from tkinter import *
 import tkinter
+import time
 from tkinter import messagebox
+
 
 nodes = []
 edges = []
+heurist = []
+i = 0
+
 
 class Node:
     def __init__(self, canvas):
@@ -95,6 +99,40 @@ class Edge:
             undi_edge.weight = self.weight
             edges.append(undi_edge)
 
+
+
+class AdjList:
+    def __init__(self):
+        self.graph = {}
+        self.numOfV = 0
+
+    def addVertexToList(self, vertex):
+        self.numOfV = self.numOfV + 1
+        self.graph[vertex] = []
+
+    def addEdgeToList(self, vertex1, vertex2, weight):
+        if vertex1 not in self.graph:
+            print(vertex1, " doesn't exist")
+        elif vertex2 not in self.graph:
+            print(vertex2, " doesn't exist")
+        else:
+            temp = [vertex2, weight]
+            self.graph[vertex1].append(temp)
+            print("directed edge added")
+
+    def printGraph(self):
+        for v in self.graph:
+            for e in self.graph[v]:
+                print(v, " -> ", e[0], " edge weight: ", e[1])
+
+
+    def createAdjList(self):
+        for node in nodes:
+            self.addVertexToList(node.index)
+        for edge in edges:
+            self.addEdgeToList(edge.start_node.index, edge.end_node.index, edge.weight)
+
+
 class App:
     def __init__(self):
         self.adding_nodes_state = False
@@ -169,12 +207,16 @@ class App:
         self.c4var = IntVar()
         self.c5var = IntVar()
         self.c6var = IntVar()
+        self.c7var = IntVar()
         c1 = Checkbutton(self.checkbox_frame, text="BFS", onvalue = 1, offvalue = 0, variable=self.c1var).grid(row=0, column=0, sticky=NW)
         c2 = Checkbutton(self.checkbox_frame, text="DFS", onvalue = 1, offvalue = 0, variable=self.c2var).grid(row=1, column=0, sticky=NW)
-        c3 = Checkbutton(self.checkbox_frame, text="Uniform Cost", onvalue = 1, offvalue = 0, variable=self.c3var).grid(row=2, column=0, sticky=NW)
+        c3 = Checkbutton(self.checkbox_frame, text="Uniform Cost", onvalue = 1, offvalue = 0, variable=self.c3var).grid(row=3, column=0, sticky=NW)
         c4 = Checkbutton(self.checkbox_frame, text="Iterative Deepening", onvalue = 1, offvalue = 0, variable=self.c4var).grid(row=2, column=0, sticky=NW)
         c5 = Checkbutton(self.checkbox_frame, text="Greedy", onvalue = 1, offvalue = 0, variable=self.c5var).grid(row=0, column=1, sticky=NW)
         c6 = Checkbutton(self.checkbox_frame, text="A*", onvalue = 1, offvalue = 0, variable=self.c6var).grid(row=1, column=1, sticky=NW)
+        c7 = Checkbutton(self.checkbox_frame, text="Depth Limited", onvalue = 1, offvalue = 0, variable=self.c7var).grid(row=2, column=1, sticky=NW)
+        self.depthLimit = Entry(self.checkbox_frame, borderwidth=3, width=5)
+        self.depthLimit.grid(row=2, column=3, sticky=NW)
         self.search_btn = Button(self.checkbox_frame, text="Search")
         self.search_btn.grid(pady=10, sticky=NW)
         self.search_btn.bind("<Button-1>", self.checkHeuristic)
@@ -188,15 +230,10 @@ class App:
     def checkHeuristic(self, event):
         if (self.c5var.get() == 1 or self.c6var.get () == 1) and len(nodes):
             for node in nodes:
-                if node.heuristic == -1:
-                    messagebox.showerror("Incomplete Heuristics","Cannot perform informed search")
-                    self.search_btn.lift()
+                if node.heuristic < 0:
+                    messagebox.showerror("Incomplete/False Heuristics","Cannot perform informed search")
                     break
         self.startSearchWindow(event)
-
-    def startSearchWindow(self, event):
-        pass
-        #TODO
 
     def setStart(self, event):
         print("start")
@@ -291,6 +328,7 @@ class App:
         self.new_di_edge = Edge(self.canvas, self.is_directed).drawEdgeFrom(event)
         #when we draw one edge, then set is_directed = True and do not allow to startAddUndirected
 
+
     def endAddDirected(self, event):
         print("end directed edges!")
         self.adding_edges_state = False
@@ -323,6 +361,121 @@ class App:
         for edge in edges:
             print("(", edge.start_node.center_x, ",", edge.start_node.center_y, ") -> ",
                   "(", edge.end_node.center_x, ",", edge.end_node.center_y, ")", edge.is_directed)
+
+    def createHeuristicList(self):
+        for node in nodes:
+            heurist.append(node.heuristic)
+
+    def turnBlue(self, canvas, visitedNodes, visited, counter, step):
+        if step < counter:
+            canvas.itemconfig(visitedNodes[visited[step]], fill='blue')
+            canvas.after(500, self.turnBlue, canvas, visitedNodes, visited, counter, step + 1)
+
+    def turnGreen(self, canvas, solutionNodes, solution, counter, step):
+        if step < counter:
+            canvas.itemconfig(solutionNodes[solution[step]], fill='green')
+            canvas.after(500, self.turnGreen, canvas, solutionNodes, solution, counter, step + 1)
+
+    def displayResults(self, searchType, visited, solution):
+        counterVis = 0
+        counterSol = 0
+        top = Toplevel()
+        top.title(searchType)
+        top.geometry("1500x750")
+        visitedNodes = []
+        solutionNodes = []
+        canvas = Canvas(top, height=700, width=1000, bg="white")
+        for node in nodes:
+            x = canvas.create_oval(node.center_x - 20, node.center_y - 20, node.center_x + 20, node.center_y + 20, fill="grey", width=3, outline="black")
+            canvas.create_text(node.center_x, node.center_y, font=("Arial", 12), text=str(node.index))
+            if node.index in visited:
+                visitedNodes.append(x)
+                counterVis += 1
+            if node.index in solution:
+                solutionNodes.append(x)
+                counterSol += 1
+        for edge in edges:
+            if edge.start_node == edge.end_node:  # bottomright to topright
+                edge.canvas.create_line(edge.start_node.right, edge.start_node.bottom,
+                                        edge.start_node.right + 15, edge.start_node.bottom,
+                                        edge.start_node.right + 15, edge.start_node.top,
+                                        edge.start_node.right, edge.start_node.top, fill="red",
+                                        width=3, arrow=edge.arrow)
+            else:
+                edge.canvas.create_line(edge.start_node.center_x, edge.start_node.center_y,
+                                        edge.end_node.center_x, edge.end_node.center_y, fill="red", width=3,
+                                        arrow=edge.arrow)
+        canvas.grid(sticky=NW, padx=10, pady=10)
+        startButton = Button(top, text="Start Search")
+        startButton.bind("<Button-1>", self.turnBlue(canvas, visitedNodes, visited, counterVis, 0))
+        startButton.bind("<Button-1>", self.turnGreen(canvas, solutionNodes, solution, counterSol, 0), '+')
+        startButton.grid(row=1, column=1,sticky=NW)
+
+    def checkCheckBoxes(self):
+        if app.c1var.get() == 1: #BFS
+            x = callSearch(1, app.list.graph, app.start_node, app.goal_nodes)
+            if x == 1:
+                solutionBFS = getSolution()
+                visitedBFS = getVisited()
+                print("BFS solution is ", solutionBFS)
+                self.displayResults('BFS', visitedBFS, solutionBFS)
+        if app.c2var.get() == 1: #DFS
+            x = callSearch(2, app.list.graph, app.start_node, app.goal_nodes)
+            if x == 1:
+                solutionDFS = getSolution()
+                visitedDFS = getVisited()
+                print("DFS solution is ", solutionDFS)
+                self.displayResults('DFS', visitedDFS, solutionDFS)
+        if app.c3var.get() == 1: #UCS
+            x = callSearch(3, app.list.graph, app.start_node, app.goal_nodes)
+            if x == 1:
+                solutionUCS = getSolution()
+                visitedUCS = getVisited()
+                print("UCS solution is ", solutionUCS)
+                self.displayResults('UCS', visitedUCS, solutionUCS)
+        if app.c7var.get() == 1: #depth limited
+            if app.depthLimit.get().isnumeric() == False:
+                messagebox.showerror("Missing Depth limit", "Please enter depth limit")
+            x = callSearch(4, app.list.graph, app.start_node, app.goal_nodes, app.depthLimit.get())
+            if x == 1:
+                solutionDLS = getSolution()
+                visitedDLS = getVisited()
+                print("Depth Limited solution is ", solutionDLS)
+                self.displayResults('DLS', visitedDLS,solutionDLS)
+        if app.c5var.get() == 1: #Greedy
+            x = callSearch(6, app.list.graph, app.start_node, app.goal_nodes, hList=heurist)
+            if x == 1:
+                solutionGreedy = getSolution()
+                visitedGreedy = getVisited()
+                print("Greedy solution is ", solutionGreedy)
+                self.displayResults('Greedy Search', visitedGreedy, solutionGreedy)
+        if app.c6var.get() == 1: #Astar
+            x = callSearch(7, app.list.graph, app.start_node, app.goal_nodes, hList=heurist)
+            if x == 1:
+                solutionAStar = getSolution()
+                visitedAStar = getVisited()
+                print("A star solution is ", solutionAStar)
+                self.displayResults('A Star Search', visitedAStar, solutionAStar)
+        if app.c4var.get() == 1: # iterative deepening
+            x = callSearch(5, app.list.graph, app.start_node, app.goal_nodes)
+            if x == 1:
+                solutionIDDS = getSolution()
+                visitedIDDS = getVisited()
+                print("Iterative Deepening solution is ", visitedIDDS, solutionIDDS)
+
+    def startSearchWindow(self, event):
+        self.list = AdjList()
+        self.list.createAdjList()
+        #self.list.printGraph()
+        self.createHeuristicList()
+        for h in heurist:
+            print(h)
+
+        if self.start_node == -1 or len(self.goal_nodes) == 0:
+            messagebox.showerror("Missing Start or Goal Nodes", "Please select start/goal nodes")
+        else:
+            self.checkCheckBoxes()
+
 
 
 
