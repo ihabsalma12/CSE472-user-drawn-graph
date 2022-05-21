@@ -37,12 +37,9 @@ def findSolution(search_tree, goal):
         findSolution(search_tree, goal.parent)
 
 closed = []
-fringe = []
-search_tree = Tree()
 def graphSearch(search_tag, graph, start, goal, depthLimit=99999):
-    closed.clear()
-    fringe.clear()
-    search_tree.nodes.clear()
+    fringe = []
+    search_tree = Tree()
     snode = SearchNode(id=start)
     search_tree.create_node(snode)
     fringe.append(snode)
@@ -73,7 +70,7 @@ def graphSearch(search_tag, graph, start, goal, depthLimit=99999):
             return 1
         if node.id not in closed:
             # print("depth is now at:", search_tree.measureDepth(node))
-            if search_tree.measureDepth(node) < depthLimit:
+            if search_tree.measureDepth(node) < int(depthLimit):
                 closed.append(node.id)
                 print("visited", node.id)
                 node.is_expanded = True
@@ -109,6 +106,8 @@ def IDDFS(graph, start, goal):
     IDDFS_solutions = [[0 for i in range(rows)] for j in range(cols)]
     for d in range(0,len(graph)):
         solution.clear()
+        closed.clear()
+        print("new iterative depth =", d)
         x = graphSearch(search_tag=2, graph=graph, start=start, goal=goal, depthLimit=d)
         if(x != -1):
             IDDFS_solutions[d] = solution.copy()
@@ -160,9 +159,11 @@ def Astar(fringe):
 
 
 def callSearch(search_tag, graph, start, goal, depthLimit=None, hList=None):
+    solution.clear()
+    closed.clear()
     if search_tag == 1 or search_tag == 2 or search_tag == 3: #BFS, DFS, UCS
         retval = graphSearch(search_tag, graph, start, goal)
-    if search_tag == 4: #depth limited
+    if search_tag == 4: #DLS
         retval = graphSearch(search_tag, graph, start, goal, depthLimit)
     if search_tag == 5: #IDDFS
         retval = IDDFS(graph, start, goal)
@@ -172,9 +173,11 @@ def callSearch(search_tag, graph, start, goal, depthLimit=None, hList=None):
     return retval
 
 def getSolution():
+    print("solution=", solution)
     return solution
 
 def getVisited():
+    print("visited=", closed)
     return closed
 
 #graph = {
@@ -205,27 +208,7 @@ goal = set()
 goal.add(7)
 goal.add(8)
 goal.add(9)
-hList = [13, 8, 10, 19, 14, 100, 18, 0, 100, 100]"""
-
-"""
-#basic input for uninformed
-#x = graphSearch(graph, start=0, goal=goal)
-#x = graphSearch(graph, start=0, goal=goal, depthLimit=2)
-#print(x)
-#print(solution)
-
-#inputs for IDDFS
-#depth_returned = IDDFS(graph, start=0, goal=goal)
-#print("solution of iterative depth first = ", solution, "at depth =", depth_returned)
-
-#Greedy or Astar input
-#goal = set()
-#goal.add(7)
-#hList = [13, 8, 10, 19, 14, 100, 18, 0, 100, 100]
-#inputHeuristic(hList)
-#x = graphSearch(graph, start=0, goal=goal)
-#print(x)
-#print(solution)
+hList = [13, 8, 10, 19, 14, 100, 18, 0, 100, 100]
 """
 
 """EXAMPLE cont."""

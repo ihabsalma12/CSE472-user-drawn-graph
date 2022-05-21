@@ -1,8 +1,7 @@
 from backend import *
-from tkinter import *
-import tkinter
-import time
 from tkinter import messagebox
+from tkinter import ttk
+from new import *
 
 
 nodes = []
@@ -98,7 +97,6 @@ class Edge:
             undi_edge.end_node = self.start_node
             undi_edge.weight = self.weight
             edges.append(undi_edge)
-
 
 
 class AdjList:
@@ -199,40 +197,46 @@ class App:
         self.add_heur_btn.bind("<Button-1>", self.changeHeuristic)
         self.add_heur_btn.grid(row=2, column=1, sticky=NE)
 
-        self.checkbox_frame = Frame(self.side_frame, pady=10)
-        self.checkbox_frame.grid(row=3, column=0)
-        self.c1var = IntVar()
-        self.c2var = IntVar()
-        self.c3var = IntVar()
-        self.c4var = IntVar()
-        self.c5var = IntVar()
-        self.c6var = IntVar()
-        self.c7var = IntVar()
-        c1 = Checkbutton(self.checkbox_frame, text="BFS", onvalue = 1, offvalue = 0, variable=self.c1var).grid(row=0, column=0, sticky=NW)
-        c2 = Checkbutton(self.checkbox_frame, text="DFS", onvalue = 1, offvalue = 0, variable=self.c2var).grid(row=1, column=0, sticky=NW)
-        c3 = Checkbutton(self.checkbox_frame, text="Uniform Cost", onvalue = 1, offvalue = 0, variable=self.c3var).grid(row=3, column=0, sticky=NW)
-        c4 = Checkbutton(self.checkbox_frame, text="Iterative Deepening", onvalue = 1, offvalue = 0, variable=self.c4var).grid(row=2, column=0, sticky=NW)
-        c5 = Checkbutton(self.checkbox_frame, text="Greedy", onvalue = 1, offvalue = 0, variable=self.c5var).grid(row=0, column=1, sticky=NW)
-        c6 = Checkbutton(self.checkbox_frame, text="A*", onvalue = 1, offvalue = 0, variable=self.c6var).grid(row=1, column=1, sticky=NW)
-        c7 = Checkbutton(self.checkbox_frame, text="Depth Limited", onvalue = 1, offvalue = 0, variable=self.c7var).grid(row=2, column=1, sticky=NW)
-        self.depthLimit = Entry(self.checkbox_frame, borderwidth=3, width=5)
-        self.depthLimit.grid(row=2, column=3, sticky=NW)
-        self.search_btn = Button(self.checkbox_frame, text="Search")
+        self.combobox_frame = Frame(self.side_frame, pady=10)
+        self.combobox_frame.grid(row=3, column=0)
+        self.search_algs_options = [
+            "Choose search algorithm", "BFS", "DFS", "UCS", "DLS", "IDDFS", "Greedy", "A*"
+        ]
+        self.search_algs_combobox = ttk.Combobox(self.combobox_frame, width=30, values=self.search_algs_options)
+        self.search_algs_combobox.current(0)
+        self.search_algs_combobox.grid(row=0, column=0, sticky=NE)
+        self.depthLimit_instr = Label(self.combobox_frame, text="DLS depth limit:")
+        self.depthLimit_instr.grid(row=1, column=0, sticky=NW, pady=10)
+        self.depthLimit = Entry(self.combobox_frame, borderwidth=3, width=15)
+        self.depthLimit.grid(row=1, column=0, sticky=NE, pady=10)
+        self.search_btn = Button(self.combobox_frame, text="Search")
         self.search_btn.grid(pady=10, sticky=NW)
-        self.search_btn.bind("<Button-1>", self.checkHeuristic)
-        #TODO finish checkboxes and link up with backend
+        self.search_btn.bind("<Button-1>", self.handleErrors)
 
     def changeHeuristic(self, event):
         nodes[int(self.heur_node.get())].heuristic = int(self.heur_val.get())
         for node in nodes:
             print("node #", node.index, " heuristic = ", node.heuristic)
 
-    def checkHeuristic(self, event):
-        if (self.c5var.get() == 1 or self.c6var.get () == 1) and len(nodes):
+    def handleErrors(self, event):
+        if self.start_node == -1 or len(self.goal_nodes) == 0:
+            messagebox.showerror("Missing Start or Goal Nodes", "Please select start/goal nodes")
+            return
+        if (self.search_algs_combobox.get() == "Greedy" or self.search_algs_combobox.get() == "A*") and len(nodes) > 0:
             for node in nodes:
                 if node.heuristic < 0:
                     messagebox.showerror("Incomplete/False Heuristics","Cannot perform informed search")
-                    break
+                    return
+        if self.search_algs_combobox.get() == "DLS":
+            try:
+                int(self.depthLimit.get())
+            except:
+                messagebox.showerror("Missing Depth limit", "Please enter valid depth limit")
+                return
+        if self.search_algs_combobox.get() == "Choose search algorithm":
+            messagebox.showerror("Unknown Search Algorithm", "Please select an algorithm to use for graph search")
+            return
+        print("launching search window...")
         self.startSearchWindow(event)
 
     def setStart(self, event):
@@ -328,7 +332,6 @@ class App:
         self.new_di_edge = Edge(self.canvas, self.is_directed).drawEdgeFrom(event)
         #when we draw one edge, then set is_directed = True and do not allow to startAddUndirected
 
-
     def endAddDirected(self, event):
         print("end directed edges!")
         self.adding_edges_state = False
@@ -366,6 +369,8 @@ class App:
         for node in nodes:
             heurist.append(node.heuristic)
 
+    #old output code
+    """
     def turnBlue(self, canvas, visitedNodes, visited, counter, step):
         if step < counter:
             canvas.itemconfig(visitedNodes[visited[step]], fill='blue')
@@ -412,56 +417,45 @@ class App:
         startButton.grid(row=1, column=1,sticky=NW)
 
     def checkCheckBoxes(self):
-        if app.c1var.get() == 1: #BFS
-            x = callSearch(1, app.list.graph, app.start_node, app.goal_nodes)
-            if x == 1:
-                solutionBFS = getSolution()
-                visitedBFS = getVisited()
-                print("BFS solution is ", solutionBFS)
-                self.displayResults('BFS', visitedBFS, solutionBFS)
-        if app.c2var.get() == 1: #DFS
-            x = callSearch(2, app.list.graph, app.start_node, app.goal_nodes)
-            if x == 1:
-                solutionDFS = getSolution()
-                visitedDFS = getVisited()
-                print("DFS solution is ", solutionDFS)
-                self.displayResults('DFS', visitedDFS, solutionDFS)
-        if app.c3var.get() == 1: #UCS
-            x = callSearch(3, app.list.graph, app.start_node, app.goal_nodes)
-            if x == 1:
-                solutionUCS = getSolution()
-                visitedUCS = getVisited()
-                print("UCS solution is ", solutionUCS)
-                self.displayResults('UCS', visitedUCS, solutionUCS)
-        if app.c7var.get() == 1: #depth limited
-            if app.depthLimit.get().isnumeric() == False:
-                messagebox.showerror("Missing Depth limit", "Please enter depth limit")
-            x = callSearch(4, app.list.graph, app.start_node, app.goal_nodes, app.depthLimit.get())
-            if x == 1:
-                solutionDLS = getSolution()
-                visitedDLS = getVisited()
-                print("Depth Limited solution is ", solutionDLS)
-                self.displayResults('DLS', visitedDLS,solutionDLS)
-        if app.c5var.get() == 1: #Greedy
-            x = callSearch(6, app.list.graph, app.start_node, app.goal_nodes, hList=heurist)
-            if x == 1:
-                solutionGreedy = getSolution()
-                visitedGreedy = getVisited()
-                print("Greedy solution is ", solutionGreedy)
-                self.displayResults('Greedy Search', visitedGreedy, solutionGreedy)
-        if app.c6var.get() == 1: #Astar
-            x = callSearch(7, app.list.graph, app.start_node, app.goal_nodes, hList=heurist)
-            if x == 1:
-                solutionAStar = getSolution()
-                visitedAStar = getVisited()
-                print("A star solution is ", solutionAStar)
-                self.displayResults('A Star Search', visitedAStar, solutionAStar)
+        #if app.c1var.get() == 1: #BFS
+         #   x = callSearch(1, app.list.graph, app.start_node, app.goal_nodes)
+          #  if x == 1:
+           #     title_window = "BFS"
+            #    self.displayResults(title_window, getVisited(), getSolution())
+        #if app.c2var.get() == 1: #DFS
+         #   x = callSearch(2, app.list.graph, app.start_node, app.goal_nodes)
+          #  if x == 1:
+           #     title_window = "DFS"
+            #    self.displayResults(title_window, getVisited(), getSolution())
+        #if app.c3var.get() == 1: #UCS
+            #x = callSearch(3, app.list.graph, app.start_node, app.goal_nodes)
+           # if x == 1:
+              #  title_window = "UCS"
+             #   self.displayResults(title_window, getVisited(), getSolution())
         if app.c4var.get() == 1: # iterative deepening
             x = callSearch(5, app.list.graph, app.start_node, app.goal_nodes)
             if x == 1:
-                solutionIDDS = getSolution()
-                visitedIDDS = getVisited()
-                print("Iterative Deepening solution is ", visitedIDDS, solutionIDDS)
+                title_window = "IDDFS"
+                self.displayResults(title_window, getVisited(), getSolution())
+        if app.c5var.get() == 1: #Greedy
+            x = callSearch(6, app.list.graph, app.start_node, app.goal_nodes, hList=heurist)
+            if x == 1:
+                title_window = "Greedy"
+                self.displayResults(title_window, getVisited(), getSolution())
+        if app.c6var.get() == 1: #Astar
+            x = callSearch(7, app.list.graph, app.start_node, app.goal_nodes, hList=heurist)
+            if x == 1:
+                title_window = "A*"
+                self.displayResults(title_window, getVisited(), getSolution())
+        if app.c7var.get() == 1: #depth limited
+            if app.depthLimit.get().isnumeric() == False:
+                messagebox.showerror("Missing Depth limit", "Please enter depth limit")
+            x = callSearch(4, app.list.graph, app.start_node, app.goal_nodes, int(app.depthLimit.get()))
+            if x == 1:
+                title_window = "DLS"
+                self.displayResults(title_window, getVisited(), getSolution())
+
+    
 
     def startSearchWindow(self, event):
         self.list = AdjList()
@@ -475,12 +469,34 @@ class App:
             messagebox.showerror("Missing Start or Goal Nodes", "Please select start/goal nodes")
         else:
             self.checkCheckBoxes()
+    """
+
+    def startSearchWindow(self, event):
+        self.adjList = AdjList()
+        self.adjList.createAdjList()
+        self.createHeuristicList()
+
+        #calc solution and visited
+        self.search_option = self.search_algs_combobox.current()
+        #print("search_tag!!!", self.search_option)
+        if self.search_algs_combobox.get() == "BFS" or self.search_algs_combobox.get() == "DFS" or self.search_algs_combobox.get() == "UCS" or self.search_algs_combobox.get() == "IDDFS":
+            x = callSearch(self.search_option, self.adjList.graph, self.start_node, self.goal_nodes)
+        elif self.search_algs_combobox.get() == "DLS":
+            x = callSearch(self.search_option, self.adjList.graph, self.start_node, self.goal_nodes, int(self.depthLimit.get()))
+        else:#elif self.search_algs_combobox.get() == "Greedy" or self.search_algs_combobox.get() == "A*":
+            x = callSearch(self.search_option, self.adjList.graph, self.start_node, self.goal_nodes, hList=heurist)
+
+        #call window to draw the solution and visited
+        if x > 0: #meaning, solution exists/ depth returned from IDDFS
+            self.output_win = SearchWindow(title=self.search_algs_combobox.get(), nodes=nodes,
+                                edges=edges, solution=getSolution(), visited=getVisited())
+            self.output_win.drawWindow()
+            #self.output_win.printInfo()
 
 
-
-
-root = Tk()
-root.geometry("1500x750")
-#root.attributes('-fullscreen', True)
-app = App()
-root.mainloop()
+if __name__ == "__main__":
+    root = Tk()
+    root.geometry("1500x750")
+    #root.attributes('-fullscreen', True)
+    app = App()
+    root.mainloop()
