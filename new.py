@@ -6,8 +6,9 @@ class SearchWindow:
         self.nodes = nodes
         self.edges = edges
 
-        #should've done this the first time
-        self.config_nodes = [[]]
+        self.node_tags = [len(self.nodes)]
+        self.config_vis_tags = []
+        self.config_sol_tags = []
 
         self.solution = solution
         self.visited = visited
@@ -27,44 +28,39 @@ class SearchWindow:
     def drawAllNodes(self):
         for node in self.nodes:
             x = self.canvas.create_oval(node.center_x - 20, node.center_y - 20, node.center_x + 20, node.center_y + 20, fill="grey",
-                                    width=3, outline="black", tags=str(node.index))
-            print("tag oval item", x, "as:", str(node.index))
-            x = self.canvas.create_text(node.center_x, node.center_y, font=("Arial", 12), text=str(node.index), tags="do_not_visit")
-            print("tag text", x, "as", "do_not_visit")
+                                    width=3, outline="black")
+            self.canvas.create_text(node.center_x, node.center_y, font=("Arial", 12), text=str(node.index))
+            x2 = int(node.index)
+            self.node_tags.insert(x2,x)
+        print("node_tags!!", self.node_tags)
+        print(self.node_tags)
+
+        #print("config vis=", self.config_vis_tags)
+        #print("config sol=", self.config_sol_tags)
 
     def drawAllEdges(self):
         for edge in self.edges:
             if edge.start_node == edge.end_node:  # self-directed edge
-                y = self.canvas.create_line(edge.start_node.right, edge.start_node.bottom,
+                self.canvas.create_line(edge.start_node.right, edge.start_node.bottom,
                                         edge.start_node.right + 15, edge.start_node.bottom,
                                         edge.start_node.right + 15, edge.start_node.top,
                                         edge.start_node.right, edge.start_node.top, fill="red",
-                                        width=3, arrow=edge.arrow, tags="do_not_visit")
+                                        width=3, arrow=edge.arrow)
             else:
-                y = self.canvas.create_line(edge.start_node.center_x, edge.start_node.center_y,
+                self.canvas.create_line(edge.start_node.center_x, edge.start_node.center_y,
                                         edge.end_node.center_x, edge.end_node.center_y, fill="red", width=3,
-                                        arrow=edge.arrow, tags="do_not_visit")
-            print("tags for edge item", y, "as tags=\"do_not_visit\"")
+                                        arrow=edge.arrow)
 
     def traceNext(self, event):
-        if len(self.solution) > 0 or len(self.visited) > 0:
+        #now, both oval and vis/sol arrays are ordered, where the first to be traced is at index[0]
+        if len(self.visited) > 0 or len(self.solution) > 0:
             if len(self.visited) > 0:
-                #print("itemconfig visited tagorID=")#, str(self.visited[0]))
-                nxt = str(self.visited[0])
-                fill = 'green'
+                nxt = str(self.node_tags[self.visited[0]])
+                fill = 'blue'
                 del self.visited[0]
             else:
-                nxt = str(self.solution[0])
-                fill = 'blue'
+                nxt = str(self.node_tags[self.solution[0]])
+                fill = 'green'
                 del self.solution[0]
-            print("now sol=", self.solution)
-            print("now vis=", self.visited)
-            print("config tag is", nxt, "and fill is", fill)
-            self.canvas.itemconfig(str(nxt), fill=fill)
-        else:
-            return
-
-
-
-    def printInfo(self):
-        print("hello, info")
+            print("next oval to color in:", nxt, "color=", fill)
+            self.canvas.itemconfig(nxt, fill=fill)

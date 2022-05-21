@@ -36,8 +36,8 @@ class Node:
     def drawNode(self):
         self.canvas.create_oval(self.center_x - 20, self.center_y - 20, self.center_x + 20,
                                 self.center_y + 20,
-                                fill="grey", width=3, outline="black")
-        self.canvas.create_text(self.center_x, self.center_y, font=("Arial", 12), text=str(self.index))
+                                fill="grey", width=3, outline="black", tags=str(self.index))
+        self.canvas.create_text(self.center_x, self.center_y, font=("Arial", 12), text=str(self.index), tags="do_not_visit")
 
 
 class Edge:
@@ -77,11 +77,11 @@ class Edge:
                                                 self.start_node.right + 15, self.start_node.bottom,
                                                 self.start_node.right + 15, self.start_node.top,
                                                 self.start_node.right, self.start_node.top, fill="red",
-                                                width=3, arrow=self.arrow)
+                                                width=3, arrow=self.arrow, tags="do_not_visit")
                     else:
                         self.canvas.create_line(self.start_node.center_x, self.start_node.center_y,
                                             self.end_node.center_x, self.end_node.center_y, fill="red", width = 3,
-                                            arrow=self.arrow)
+                                            arrow=self.arrow, tags="do_not_visit")
                     self.createEdge()
                     self.canvas.bind("<Button-1>", app.addEdge)
 
@@ -289,8 +289,9 @@ class App:
                     else:
                         weight_x = (edge.start_node.center_x + edge.end_node.center_x)/2
                         weight_y = (edge.start_node.center_y + edge.end_node.center_y)/2
-                    self.canvas.create_rectangle(weight_x-10, weight_y-10, weight_x+10, weight_y+10, fill="yellow", outline="red")
-                    self.canvas.create_text(weight_x, weight_y, font=("Arial", 10), text=str(self.weight_val.get()))
+                    self.canvas.create_rectangle(weight_x-10, weight_y-10, weight_x+10, weight_y+10, fill="yellow", outline="red",
+                                                 tags="do_not_visit")
+                    self.canvas.create_text(weight_x, weight_y, font=("Arial", 10), text=str(self.weight_val.get()), tags="do_not_visit")
                     print("weight drawn")
                 print("edge weight = ", edge.weight)
 
@@ -491,7 +492,6 @@ class App:
             self.output_win = SearchWindow(title=self.search_algs_combobox.get(), nodes=nodes,
                                 edges=edges, solution=getSolution(), visited=getVisited())
             self.output_win.drawWindow()
-            #self.output_win.printInfo()
 
 
 if __name__ == "__main__":
