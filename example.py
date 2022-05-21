@@ -1,47 +1,37 @@
+#!/usr/bin/env python
+# vim: set fileencoding=utf-8
 
-from tkinter import *
+#
+#  (C) Copyright 2017, 2018  Pavel Tisnovsky
+#
+#  All rights reserved. This program and the accompanying materials
+#  are made available under the terms of the Eclipse Public License v1.0
+#  which accompanies this distribution, and is available at
+#  http://www.eclipse.org/legal/epl-v10.html
+#
+#  Contributors:
+#      Pavel Tisnovsky
+#
 
-master = Tk()
-master.title('Painting in Python')
+import tkinter
+from tkinter import ttk
 
-canvas_width = 600
-canvas_height = 450
-color='white'
-bg ='black'
-
-def REDPEN():
-    global color
-    color='red'
-    print(color)
-def BLUEPEN():
-    global color
-    color='blue'
-    print(color)
-def GREENPEN():
-    global color
-    color='green'
-    print(color)
-
-def paint(event):
-    global color
-    x1,y1=(event.x-1),(event.y-1)
-    x2,y2=(event.x+1),(event.y+1)
-    c.create_oval(x1,y1,x2,y2,fill=color,outline=color,width=0)
-
-RedButton = Button(master, text = "RED", command =REDPEN)
-BlueButton = Button(master, text = "BLUE", command =BLUEPEN)
-GreenButton = Button(master, text = "GREEN", command =GREENPEN)
-
-RedButton.pack()
-BlueButton.pack()
-GreenButton.pack()
+def clicked(event):
+    canvas.itemconfig("ovals", fill="blue")
 
 
-c=Canvas(master,width=canvas_width,height=canvas_height,bg=bg)
+root = tkinter.Tk()
 
-c.pack(expand=YES,fill=BOTH)
-c.bind('<B1-Motion>',paint)
+canvas = tkinter.Canvas(root, width=256, height=256)
+canvas.pack()
 
-message=Label(master,text='Press and Drag to draw')
-message.pack(side=BOTTOM)
-master.mainloop()
+canvas.create_oval(10, 10, 110, 110, tags="ovals")
+canvas.create_oval(150, 10, 250, 110, tags="nope")
+canvas.create_oval(10, 150, 110, 250, tags="ovals")
+canvas.create_oval(150, 150, 250, 250, tags="ovals")
+
+b = tkinter.Button(root, text="click me")
+b.bind("<Button-1>", clicked)
+b.pack()
+
+root.mainloop()

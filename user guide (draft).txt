@@ -19,5 +19,5 @@ Then, click on the button again.
 step 9) Click on goal nodes button, choose all your goal nodes, then click on the button again.
 Note: to clear goal nodes, repeat step 9.
 
-step 10) Tick checkboxes. Click "Search".
+step 10) Choose search algorithm. Click "Search".
 Results displayed.
