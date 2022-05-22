@@ -32,7 +32,7 @@ class Tree:
 
 solution = []
 def findSolution(search_tree, goal):
-    solution.insert(0, goal.id)
+    solution.append(goal.id)
     if(goal.parent != None):
         findSolution(search_tree, goal.parent)
 
@@ -70,7 +70,12 @@ def graphSearch(search_tag, graph, start, goal, depthLimit=99999):
             return 1
         if node.id not in closed:
             # print("depth is now at:", search_tree.measureDepth(node))
-            if search_tree.measureDepth(node) < int(depthLimit):
+            if search_tree.measureDepth(node) >= int(depthLimit):
+                #if node.id not in closed:
+                 #   closed.append(node.id)
+                node.is_expanded = True
+                print("visited node:", node.id, "but not expanded because past depth:", depthLimit)
+            else:
                 closed.append(node.id)
                 print("visited", node.id)
                 node.is_expanded = True
@@ -83,6 +88,8 @@ def graphSearch(search_tag, graph, start, goal, depthLimit=99999):
                     fringe.append(cnode)
         else:
             print("haha skipped:", node.id)
+            node.is_expanded = True
+            print("visited, but not expanded because repeated:", node.id)
         fringe.remove(node)
 
 def BFS(fringe):
@@ -103,20 +110,20 @@ def UCS(fringe):
 
 def IDDFS(graph, start, goal):
     rows = cols = len(graph)
-    IDDFS_solutions = [[0 for i in range(rows)] for j in range(cols)]
+    #IDDFS_solutions = [[0 for i in range(rows)] for j in range(cols)]
     for d in range(0,len(graph)):
         solution.clear()
         closed.clear()
         print("new iterative depth =", d)
         x = graphSearch(search_tag=2, graph=graph, start=start, goal=goal, depthLimit=d)
         if(x != -1):
-            IDDFS_solutions[d] = solution.copy()
+            #IDDFS_solutions[d] = solution.copy()
             print("finally, IDDFS solutions array")
-            for i in IDDFS_solutions:
-                print(i)
+            #for i in IDDFS_solutions:
+             #   print(i)
             return d
-        else:
-            IDDFS_solutions[d].clear()
+        #else:
+            #IDDFS_solutions[d].clear()
 
 def inputHeuristic(hList):
     for h in hList:
@@ -144,19 +151,6 @@ def Astar(fringe):
     return min_f_node
 
 
-#graph = {
-#    'S':[('A', 5), ('B', 9), ('D', 6)],
-#    'A':[('B', 3), ('G1', 9)],
-#    'B':[('A', 2), ('C', 1)],
-#    'C':[('G2', 5), ('F', 7)],
-#    'D':[('C', 2), ('E', 2)],
-#    'E':[('G3', 7)],
-#    'F':[('D', 2), ('G3', 8)],
-#    'G1':[],
- #   'G2':[],
- #   'G3':[]
-#}
-
 
 def callSearch(search_tag, graph, start, goal, depthLimit=None, hList=None):
     solution.clear()
@@ -180,6 +174,24 @@ def getVisited():
     print("visited=", closed)
     return closed
 
+
+
+
+
+#for ref only
+#graph = {
+#    'S':[('A', 5), ('B', 9), ('D', 6)],
+#    'A':[('B', 3), ('G1', 9)],
+#    'B':[('A', 2), ('C', 1)],
+#    'C':[('G2', 5), ('F', 7)],
+#    'D':[('C', 2), ('E', 2)],
+#    'E':[('G3', 7)],
+#    'F':[('D', 2), ('G3', 8)],
+#    'G1':[],
+ #   'G2':[],
+ #   'G3':[]
+#}
+
 #graph = {
 #0: [(1, 2), (2, 3), (4, 5)],
 #1: [(3, 4)],
@@ -189,8 +201,9 @@ def getVisited():
 #5: []
 #}
 
+""""""""""""
 
-#EXAMPLE
+#EXAMPLE in lecture 3,4
 """graph = {
     0:[(1, 5), (2, 9), (4, 6)],
     1:[(2, 3), (7, 9)],
@@ -211,13 +224,12 @@ goal.add(9)
 hList = [13, 8, 10, 19, 14, 100, 18, 0, 100, 100]
 """
 
-"""EXAMPLE cont."""
 #final test callSearch
 #x = callSearch(search_tag=1or2or3, graph=graph, start=start, goal=goal)
-#x = callSearch(search_tag=4, graph=graph, start=start, goal=goal, depthLimit=1)
+#x = callSearch(search_tag=4, graph=graph, start=start, goal=goal, depthLimit=2)
 #x = callSearch(search_tag=5, graph=graph, start=start, goal=goal)
 #print("ans at depth=", x)
-#x = callSearch(search_tag=6or7, graph=graph, start=start, goal=goal, hList=hList)
+#x = callSearch(search_tag=7, graph=graph, start=start, goal=goal, hList=hList)
 #print("solution exists? ans=", x)
 #print("solution=",getSolution())
 #print("visited=",getVisited())

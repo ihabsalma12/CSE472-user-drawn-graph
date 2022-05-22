@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import font as tkfont
 
 class SearchWindow:
     def __init__(self, title, nodes, edges, solution, visited):
@@ -27,9 +28,10 @@ class SearchWindow:
 
     def drawAllNodes(self):
         for node in self.nodes:
-            x = self.canvas.create_oval(node.center_x - 20, node.center_y - 20, node.center_x + 20, node.center_y + 20, fill="grey",
-                                    width=3, outline="black")
-            self.canvas.create_text(node.center_x, node.center_y, font=("Arial", 12), text=str(node.index))
+            x = self.canvas.create_oval(node.center_x - 30, node.center_y - 30, node.center_x + 30, node.center_y + 30, fill="light grey",
+                                    width=5, outline="black")
+            bold_font = tkfont.Font(family="Helvetica", size=16, weight="bold")
+            self.canvas.create_text(node.center_x, node.center_y, font=bold_font, text=str(node.index))
             x2 = int(node.index)
             self.node_tags.insert(x2,x)
         print("node_tags!!", self.node_tags)
@@ -44,12 +46,12 @@ class SearchWindow:
                 self.canvas.create_line(edge.start_node.right, edge.start_node.bottom,
                                         edge.start_node.right + 15, edge.start_node.bottom,
                                         edge.start_node.right + 15, edge.start_node.top,
-                                        edge.start_node.right, edge.start_node.top, fill="red",
-                                        width=3, arrow=edge.arrow)
+                                        edge.start_node.right, edge.start_node.top, fill="dark blue",
+                                        width=5, arrow=edge.arrow)
             else:
                 self.canvas.create_line(edge.start_node.center_x, edge.start_node.center_y,
-                                        edge.end_node.center_x, edge.end_node.center_y, fill="red", width=3,
-                                        arrow=edge.arrow)
+                                        edge.end_node.center_x, edge.end_node.center_y, fill="dark blue", width=5,
+                                        arrow=edge.arrow, arrowshape= (16, 20, 6))
 
     def traceNext(self, event):
         #now, both oval and vis/sol arrays are ordered, where the first to be traced is at index[0]

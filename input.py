@@ -2,6 +2,7 @@ from backend import *
 from tkinter import messagebox
 from tkinter import ttk
 from new import *
+from tkinter import font as tkfont
 
 
 nodes = []
@@ -14,7 +15,6 @@ class Node:
     def __init__(self, canvas):
         self.canvas = canvas
         self.index = len(nodes)
-        #TODO look this up: https://tkinter-docs.readthedocs.io/en/latest/widgets/canvas.html?highlight=create_circle
         self.center_x = -1
         self.center_y = -1
         self.top = -1
@@ -27,17 +27,18 @@ class Node:
         self.index = len(nodes)
         self.center_x = event.x
         self.center_y = event.y
-        self.top = self.center_y - 20
-        self.bottom = self.center_y + 20
-        self.left = self.center_x - 20
-        self.right = self.center_x + 20
+        self.top = self.center_y - 30
+        self.bottom = self.center_y + 30
+        self.left = self.center_x - 30
+        self.right = self.center_x + 30
         nodes.append(self)
 
     def drawNode(self):
-        self.canvas.create_oval(self.center_x - 20, self.center_y - 20, self.center_x + 20,
-                                self.center_y + 20,
-                                fill="grey", width=3, outline="black", tags=str(self.index))
-        self.canvas.create_text(self.center_x, self.center_y, font=("Arial", 12), text=str(self.index), tags="do_not_visit")
+        self.canvas.create_oval(self.center_x - 30, self.center_y - 30, self.center_x + 30,
+                                self.center_y + 30,
+                                fill="light grey", width=3, outline="black", tags=str(self.index))
+        bold_font = tkfont.Font(family="Helvetica", size=16, weight="bold")
+        self.canvas.create_text(self.center_x, self.center_y, font=bold_font, text=str(self.index), tags="do_not_visit")
 
 
 class Edge:
@@ -76,12 +77,12 @@ class Edge:
                         self.canvas.create_line(self.start_node.right, self.start_node.bottom,
                                                 self.start_node.right + 15, self.start_node.bottom,
                                                 self.start_node.right + 15, self.start_node.top,
-                                                self.start_node.right, self.start_node.top, fill="red",
-                                                width=3, arrow=self.arrow, tags="do_not_visit")
+                                                self.start_node.right, self.start_node.top, fill="dark blue",
+                                                width=5, arrow=self.arrow, arrowshape= (8, 10, 3), tags="do_not_visit")
                     else:
                         self.canvas.create_line(self.start_node.center_x, self.start_node.center_y,
-                                            self.end_node.center_x, self.end_node.center_y, fill="red", width = 3,
-                                            arrow=self.arrow, tags="do_not_visit")
+                                            self.end_node.center_x, self.end_node.center_y, fill="dark blue", width = 5,
+                                            arrow=self.arrow, arrowshape= (16, 20, 6), tags="do_not_visit")
                     self.createEdge()
                     self.canvas.bind("<Button-1>", app.addEdge)
 
@@ -241,7 +242,7 @@ class App:
 
     def setStart(self, event):
         print("start")
-        self.start_node_btn.configure(bg="blue")
+        self.start_node_btn.configure(bg="#34ace0")
         self.setStartID = self.canvas.bind("<Button-1>", self.chooseStart)
         self.start_node_btn.bind("<Button-1>", self.endSetStart)
 
@@ -259,7 +260,7 @@ class App:
     def setGoals(self, event):
         print("goals")
         self.goal_nodes.clear()
-        self.goal_nodes_btn.configure(bg="green")
+        self.goal_nodes_btn.configure(bg="#33d9b2")
         self.setGoalsID = self.canvas.bind("<Button-1>", self.chooseGoals)
         self.goal_nodes_btn.bind("<Button-1>", self.endSetGoals)
 
@@ -289,7 +290,7 @@ class App:
                     else:
                         weight_x = (edge.start_node.center_x + edge.end_node.center_x)/2
                         weight_y = (edge.start_node.center_y + edge.end_node.center_y)/2
-                    self.canvas.create_rectangle(weight_x-10, weight_y-10, weight_x+10, weight_y+10, fill="yellow", outline="red",
+                    self.canvas.create_rectangle(weight_x-10, weight_y-10, weight_x+10, weight_y+10, fill="yellow", outline="dark blue",
                                                  tags="do_not_visit")
                     self.canvas.create_text(weight_x, weight_y, font=("Arial", 10), text=str(self.weight_val.get()), tags="do_not_visit")
                     print("weight drawn")
@@ -370,108 +371,6 @@ class App:
         for node in nodes:
             heurist.append(node.heuristic)
 
-    #old output code
-    """
-    def turnBlue(self, canvas, visitedNodes, visited, counter, step):
-        if step < counter:
-            canvas.itemconfig(visitedNodes[visited[step]], fill='blue')
-            canvas.after(500, self.turnBlue, canvas, visitedNodes, visited, counter, step + 1)
-
-    def turnGreen(self, canvas, solutionNodes, solution, counter, step):
-        if step < counter:
-            canvas.itemconfig(solutionNodes[solution[step]], fill='green')
-            canvas.after(500, self.turnGreen, canvas, solutionNodes, solution, counter, step + 1)
-
-    def displayResults(self, searchType, visited, solution):
-        counterVis = 0
-        counterSol = 0
-        top = Toplevel()
-        top.title(searchType)
-        top.geometry("1500x750")
-        visitedNodes = []
-        solutionNodes = []
-        canvas = Canvas(top, height=700, width=1000, bg="white")
-        for node in nodes:
-            x = canvas.create_oval(node.center_x - 20, node.center_y - 20, node.center_x + 20, node.center_y + 20, fill="grey", width=3, outline="black")
-            canvas.create_text(node.center_x, node.center_y, font=("Arial", 12), text=str(node.index))
-            if node.index in visited:
-                visitedNodes.append(x)
-                counterVis += 1
-            if node.index in solution:
-                solutionNodes.append(x)
-                counterSol += 1
-        for edge in edges:
-            if edge.start_node == edge.end_node:  # bottomright to topright
-                edge.canvas.create_line(edge.start_node.right, edge.start_node.bottom,
-                                        edge.start_node.right + 15, edge.start_node.bottom,
-                                        edge.start_node.right + 15, edge.start_node.top,
-                                        edge.start_node.right, edge.start_node.top, fill="red",
-                                        width=3, arrow=edge.arrow)
-            else:
-                edge.canvas.create_line(edge.start_node.center_x, edge.start_node.center_y,
-                                        edge.end_node.center_x, edge.end_node.center_y, fill="red", width=3,
-                                        arrow=edge.arrow)
-        canvas.grid(sticky=NW, padx=10, pady=10)
-        startButton = Button(top, text="Start Search")
-        startButton.bind("<Button-1>", self.turnBlue(canvas, visitedNodes, visited, counterVis, 0))
-        startButton.bind("<Button-1>", self.turnGreen(canvas, solutionNodes, solution, counterSol, 0), '+')
-        startButton.grid(row=1, column=1,sticky=NW)
-
-    def checkCheckBoxes(self):
-        #if app.c1var.get() == 1: #BFS
-         #   x = callSearch(1, app.list.graph, app.start_node, app.goal_nodes)
-          #  if x == 1:
-           #     title_window = "BFS"
-            #    self.displayResults(title_window, getVisited(), getSolution())
-        #if app.c2var.get() == 1: #DFS
-         #   x = callSearch(2, app.list.graph, app.start_node, app.goal_nodes)
-          #  if x == 1:
-           #     title_window = "DFS"
-            #    self.displayResults(title_window, getVisited(), getSolution())
-        #if app.c3var.get() == 1: #UCS
-            #x = callSearch(3, app.list.graph, app.start_node, app.goal_nodes)
-           # if x == 1:
-              #  title_window = "UCS"
-             #   self.displayResults(title_window, getVisited(), getSolution())
-        if app.c4var.get() == 1: # iterative deepening
-            x = callSearch(5, app.list.graph, app.start_node, app.goal_nodes)
-            if x == 1:
-                title_window = "IDDFS"
-                self.displayResults(title_window, getVisited(), getSolution())
-        if app.c5var.get() == 1: #Greedy
-            x = callSearch(6, app.list.graph, app.start_node, app.goal_nodes, hList=heurist)
-            if x == 1:
-                title_window = "Greedy"
-                self.displayResults(title_window, getVisited(), getSolution())
-        if app.c6var.get() == 1: #Astar
-            x = callSearch(7, app.list.graph, app.start_node, app.goal_nodes, hList=heurist)
-            if x == 1:
-                title_window = "A*"
-                self.displayResults(title_window, getVisited(), getSolution())
-        if app.c7var.get() == 1: #depth limited
-            if app.depthLimit.get().isnumeric() == False:
-                messagebox.showerror("Missing Depth limit", "Please enter depth limit")
-            x = callSearch(4, app.list.graph, app.start_node, app.goal_nodes, int(app.depthLimit.get()))
-            if x == 1:
-                title_window = "DLS"
-                self.displayResults(title_window, getVisited(), getSolution())
-
-    
-
-    def startSearchWindow(self, event):
-        self.list = AdjList()
-        self.list.createAdjList()
-        #self.list.printGraph()
-        self.createHeuristicList()
-        for h in heurist:
-            print(h)
-
-        if self.start_node == -1 or len(self.goal_nodes) == 0:
-            messagebox.showerror("Missing Start or Goal Nodes", "Please select start/goal nodes")
-        else:
-            self.checkCheckBoxes()
-    """
-
     def startSearchWindow(self, event):
         self.adjList = AdjList()
         self.adjList.createAdjList()
@@ -492,6 +391,8 @@ class App:
             self.output_win = SearchWindow(title=self.search_algs_combobox.get(), nodes=nodes,
                                 edges=edges, solution=getSolution(), visited=getVisited())
             self.output_win.drawWindow()
+        else:
+            messagebox.showerror("No Solution", "No solution has been found")
 
 
 if __name__ == "__main__":
