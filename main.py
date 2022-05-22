@@ -1,7 +1,7 @@
 from backend import *
 from tkinter import messagebox
 from tkinter import ttk
-from new import *
+from window import *
 from tkinter import font as tkfont
 
 
